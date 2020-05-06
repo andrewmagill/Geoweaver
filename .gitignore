@@ -14,4 +14,7 @@
 .classpath
 .project
 .settings
+/bin/
+
+.metadata
 sync.ffs_db

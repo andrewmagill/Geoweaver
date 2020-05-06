@@ -156,7 +156,7 @@ public class WorkflowTool {
 			
 		}finally {
 
-			DataBaseOperation.closeConnection();
+			// DataBaseOperation.closeConnection();
 			
 		}
 		
