@@ -2,6 +2,7 @@ package gw.ws.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,6 +45,32 @@ public class Java2JupyterClientEndpoint extends Endpoint
     private Java2JupyterClientDialog window;
     
 
+    public static String upperAllFirst(String key) {
+    	
+    	String[] ks = key.split("-");
+    	
+    	for(int i=0;i<ks.length;i++) {
+    		
+    		ks[i] = ks[i].substring(0, 1).toUpperCase() + ks[i].substring(1);
+    		
+    		ks[i] = ks[i].replace("Websocket", "WebSocket");
+    		
+    	}
+    	
+    	StringBuffer sb = new StringBuffer();
+    	
+    	for(int i=0;i<ks.length;i++) {
+    		
+    		if(i!=0)sb.append("-");
+    		
+    		sb.append(ks[i]);
+    		
+    	}
+    	
+    	return sb.toString();
+    	
+    }
+    
     public Java2JupyterClientEndpoint(URI endpointURI, Session jssession, Map<String, List<String>> headers) {
     	
         try {
@@ -61,26 +88,51 @@ public class Java2JupyterClientEndpoint extends Endpoint
                 public void beforeRequest(Map<String, List<String>> nativeheaders) {
 //                	headers.put("Cookie", Arrays.asList("JSESSIONID=" + sessionID));
                 	
+                	logger.info("Original Native Headers: " + nativeheaders);
+                	
                 	Map<String, List<String>> uppercaseheaders = new HashMap();
                 	
-                	Iterator hmIterator = nativeheaders.entrySet().iterator(); 
+                	Iterator hmIterator = headers.entrySet().iterator(); 
                 	
                     while (hmIterator.hasNext()) {
                         Map.Entry<String, List<String>> mapElement = (Map.Entry)hmIterator.next(); 
                         
                         String newkey = mapElement.getKey();
                         
-                        newkey = newkey.substring(0, 1).toUpperCase() + newkey.substring(1);
+                        newkey = upperAllFirst(newkey);
+//                        newkey = newkey.toLowerCase();
                         
                         List<String> values = mapElement.getValue();
                         
-                        uppercaseheaders.put(newkey, values);
+                        if("Host".equals(newkey) || "Origin".equals(newkey)) {
+                        	
+                        	continue;
+                        }
+                        
+//                        if("Host".equals(newkey) ) {
+//                        	
+//                        	List<String> local = new ArrayList();
+//                        	local.add("localhost:8888");
+//                        	uppercaseheaders.put(newkey, local);
+//                        	
+//                        }else if ("Origin".equals(newkey)){
+//                        	
+//                        	List<String> local = new ArrayList();
+//                        	local.add("http://localhost:8888");
+//                        	uppercaseheaders.put(newkey, local);
+//                        	
+//                        }else {
+                        	uppercaseheaders.put(newkey, values);
+                        	
+                        	logger.info("Key:" + newkey + " - Values: " + values);
+//                        }
                         
                     } 
                     
                 	nativeheaders.putAll(uppercaseheaders);
+//                    nativeheaders = uppercaseheaders;
                 	
-                	logger.info("Native Headers Loggout: " + nativeheaders);
+                	logger.info("New Native Headers Loggout: " + nativeheaders);
                 	
                 }
                 
