@@ -569,7 +569,7 @@ GW.process = {
 			
 			content ="<h4 class=\"border-bottom\">History Section  <button type=\"button\" class=\"btn btn-secondary btn-sm\" id=\"closeHistory\" >close</button></h4>"+
 			"<div id=\"process-chart-container\" width=\"200\" height=\"100\">"+
-			"<canvas id=\"process-history-chart\" style=\"width:200px !important; height:100px !important;\" ></canvas>"+
+			"<canvas id=\"process-history-chart\" style=\"width:200px !important; height:50px !important;\" ></canvas>"+
 			"</div>" + content ;
 			
 			return content;
@@ -1012,7 +1012,6 @@ GW.process = {
 			var content = "<div class=\"modal-body\">";
 			
 			content += '   <div class="row" style="padding:0px;margin:0px;">'+
-			   ''+
 		       '     <div style="font-size: 12px;" class="col-sm-2 col-form-label control-label">Category</div>'+
 		       '     <div class="col-sm-3" style="padding:0;">'+
 		       '			<select class="form-control form-control-sm" id="processcategory">'+
@@ -1028,14 +1027,14 @@ GW.process = {
 		       '     <div style="font-size: 12px;" class="col-sm-2 col-form-label control-label">Name</div>'+
 		       '     <div class="col-sm-4" style="padding:0;">'+
 		       '			<input type="text" class="form-control form-control-sm" id="processname"></input>'+
-//		       '			<input type="text" class="form-control form-control-sm" ></input>'+
+	//		       '			<input type="text" class="form-control form-control-sm" ></input>'+
 		       '     </div>'+
 		       '   </div>' + 
 		       '   <div class="row" style="padding:0px;margin:0px;">'+
 		       '     <div style="font-size: 12px;" class="col-sm-2 col-form-label control-label">ID</div>'+
 		       '     <div class="col-sm-3" style="padding:0;">'+
 		       '			<input type="text" class="form-control form-control-sm" id="processid"></input>'+
-//		       '			<input type="text" class="form-control form-control-sm" ></input>'+
+	//		       '			<input type="text" class="form-control form-control-sm" ></input>'+
 		       '     </div>'+
 		       '   </div>'+
 		       '   <div class="form-group row" style="padding:0px;margin:0px;" >'+
@@ -1293,7 +1292,8 @@ GW.process = {
 				if(!folder_ul.length){
 					
 					$("#"+GW.menu.getPanelIdByType("process"))
-						.append("<li class=\"folder\" id=\"process_folder_"+ folder +"\" data-toggle=\"collapse\" data-target=\"#process_folder_"+ folder +"_target\"> "+
+						.append("<li class=\"folder\" id=\"process_folder_"+ folder +
+						"\" data-toggle=\"collapse\" data-target=\"#process_folder_"+ folder +"_target\"> "+
 					    " <a href=\"javascript:void(0)\"> "+ folder +" </a>"+
 					    " </li>"+
 					    " <ul class=\"sub-menu collapse\" id=\"process_folder_"+ folder +"_target\"></ul>");

@@ -27,6 +27,7 @@ import javax.websocket.WebSocketContainer;
 
 import org.apache.log4j.Logger;
 
+import gw.jpa.Host;
 import gw.utils.BaseTool;
 
 /**
@@ -38,7 +39,9 @@ import gw.utils.BaseTool;
 public class Java2JupyterClientEndpoint extends Endpoint 
 {
 
-	Session newjupyteression = null;
+	Session new_ws_session_between_geoweaver_and_jupyterserver = null;
+	
+	Session new_ws_session_between_browser_and_geoweaver = null;
 	
     private Logger logger = Logger.getLogger(this.getClass());
     
@@ -71,11 +74,11 @@ public class Java2JupyterClientEndpoint extends Endpoint
     	
     }
     
-    public Java2JupyterClientEndpoint(URI endpointURI, Session jssession, Map<String, List<String>> headers) {
+    public Java2JupyterClientEndpoint(URI endpointURI, Session jssession, Map<String, List<String>> headers, Host h) {
     	
         try {
         	
-        	this.newjupyteression = jssession;
+        	this.new_ws_session_between_browser_and_geoweaver = jssession;
             
         	WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         	
@@ -83,6 +86,13 @@ public class Java2JupyterClientEndpoint extends Endpoint
             Builder configBuilder = ClientEndpointConfig.Builder.create();
             
             configBuilder.configurator(new Configurator() {
+            	
+            	@Override
+            	public void afterResponse(HandshakeResponse hr) {
+            		
+            		logger.info("Response Headers from Jupyter : " + hr.getHeaders());
+
+                }
             	
                 @Override
                 public void beforeRequest(Map<String, List<String>> nativeheaders) {
@@ -94,6 +104,8 @@ public class Java2JupyterClientEndpoint extends Endpoint
                 	
                 	Iterator hmIterator = headers.entrySet().iterator(); 
                 	
+                	String[] hostjupyters = h.parseJupyterURL();
+                	
                     while (hmIterator.hasNext()) {
                         Map.Entry<String, List<String>> mapElement = (Map.Entry)hmIterator.next(); 
                         
@@ -104,21 +116,24 @@ public class Java2JupyterClientEndpoint extends Endpoint
                         
                         List<String> values = mapElement.getValue();
                         
-                        if("Host".equals(newkey) || "Origin".equals(newkey)) {
+//                        if("Sec-WebSocket-Key".equals(newkey)) {
+                    	if("Host".equals(newkey) || "Origin".equals(newkey) || "Sec-WebSocket-Key".equals(newkey)) {
                         	
                         	continue;
+                        	
                         }
                         
 //                        if("Host".equals(newkey) ) {
 //                        	
 //                        	List<String> local = new ArrayList();
-//                        	local.add("localhost:8888");
+//                        	local.add(hostjupyters[1] + ":" + hostjupyters[2]);
 //                        	uppercaseheaders.put(newkey, local);
 //                        	
 //                        }else if ("Origin".equals(newkey)){
 //                        	
 //                        	List<String> local = new ArrayList();
-//                        	local.add("http://localhost:8888");
+////                        	local.add("http://localhost:8888");
+//                        	local.add(hostjupyters[0] + "://" + hostjupyters[1] + ":" + hostjupyters[2]);
 //                        	uppercaseheaders.put(newkey, local);
 //                        	
 //                        }else {
@@ -201,9 +216,9 @@ public class Java2JupyterClientEndpoint extends Endpoint
     	
     	logger.info("Override The connection between Java and Jupyter server is established.");
     	
-        this.newjupyteression = session;
+        this.new_ws_session_between_geoweaver_and_jupyterserver = session;
         
-        this.newjupyteression.addMessageHandler(new MessageHandler.Whole<String>() {
+        this.new_ws_session_between_geoweaver_and_jupyterserver.addMessageHandler(new MessageHandler.Whole<String>() {
             @Override
             public void onMessage(String message) {
             	
@@ -213,7 +228,14 @@ public class Java2JupyterClientEndpoint extends Endpoint
                 	
                 	logger.info("send this message back to the client");
                 	
-//                	if(!BaseTool.isNull(this.newjupyteression)) this.newjupyteression.getAsyncRemote().sendText(message);
+                	if(!BaseTool.isNull(new_ws_session_between_browser_and_geoweaver)) {
+                		
+                		new_ws_session_between_browser_and_geoweaver.getAsyncRemote().sendText(message);
+                		
+                		logger.info("the message should already be sent");
+                		
+                	}
+                	
                 	
                 	if(!BaseTool.isNull(window)) {
                 		
@@ -234,10 +256,11 @@ public class Java2JupyterClientEndpoint extends Endpoint
 		try {
 			
 	        logger.info("Peer " + session.getId() + " disconnected due to " + closeReason.getReasonPhrase());
-	        this.newjupyteression = null;
+	        this.new_ws_session_between_geoweaver_and_jupyterserver = null;
 	    	logger.info("The connection between Javascript and Geoweaver is closed. ");
 			
-			if(!BaseTool.isNull(this.newjupyteression))this.newjupyteression.close();
+			if(!BaseTool.isNull(this.new_ws_session_between_browser_and_geoweaver))
+				this.new_ws_session_between_browser_and_geoweaver.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -251,11 +274,6 @@ public class Java2JupyterClientEndpoint extends Endpoint
         logger.info("Error communicating with peer " + session.getId() + ". Detail: "+ error.getMessage());
     }
     
-    public Session getNewjupyteression() {
-		return newjupyteression;
-	}
-
-
     /**
      * Send a message.
      * 
@@ -263,23 +281,31 @@ public class Java2JupyterClientEndpoint extends Endpoint
      * @param message
      */
     public void sendMessage(String message) {
-        this.newjupyteression.getAsyncRemote().sendText(message);
+        this.new_ws_session_between_geoweaver_and_jupyterserver.getAsyncRemote().sendText(message);
     }
-
-
-
-	public void setNewjupyteression(Session newjupyteression) {
-		this.newjupyteression = newjupyteression;
+    
+    
+	public Session getNew_ws_session_between_geoweaver_and_jupyterserver() {
+		return new_ws_session_between_geoweaver_and_jupyterserver;
 	}
 
+	public void setNew_ws_session_between_geoweaver_and_jupyterserver(
+			Session new_ws_session_between_geoweaver_and_jupyterserver) {
+		this.new_ws_session_between_geoweaver_and_jupyterserver = new_ws_session_between_geoweaver_and_jupyterserver;
+	}
 
+	public Session getNew_ws_session_between_browser_and_geoweaver() {
+		return new_ws_session_between_browser_and_geoweaver;
+	}
+
+	public void setNew_ws_session_between_browser_and_geoweaver(Session new_ws_session_between_browser_and_geoweaver) {
+		this.new_ws_session_between_browser_and_geoweaver = new_ws_session_between_browser_and_geoweaver;
+	}
 
 	public Java2JupyterClientDialog getWindow() {
 		return window;
 	}
-
-
-
+	
 	public void setWindow(Java2JupyterClientDialog window) {
 		this.window = window;
 	}
@@ -296,9 +322,6 @@ public class Java2JupyterClientEndpoint extends Endpoint
 //        this.newjupyteression = userSession;
 //    }
 	
-	
-    
-
 //    /**
 //     * Callback hook for Connection close events.
 //     * 
@@ -338,10 +361,6 @@ public class Java2JupyterClientEndpoint extends Endpoint
 //    	}
 //    	
 //    }
-
-
-
 	
-
 	
 }
