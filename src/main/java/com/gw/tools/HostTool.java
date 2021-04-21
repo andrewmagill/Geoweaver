@@ -1,19 +1,11 @@
 package com.gw.tools;
 
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gw.database.DataBaseOperation;
 import com.gw.database.EnvironmentRepository;
 import com.gw.database.HistoryRepository;
 import com.gw.database.HostRepository;
@@ -22,6 +14,10 @@ import com.gw.jpa.History;
 import com.gw.jpa.Host;
 import com.gw.utils.BaseTool;
 import com.gw.utils.RandomString;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class HostTool {
@@ -153,6 +149,8 @@ public class HostTool {
 				resp.append("\"name\": \"").append(h.getHistory_process()).append("\", ");
 				
 				resp.append("\"end_time\": \"").append(h.getHistory_end_time()).append("\", ");
+
+				resp.append("\"notes\": \"").append(h.getHistory_notes()).append("\", ");
 				
 				resp.append("\"status\": \"").append(h.getIndicator()).append("\", ");
 				

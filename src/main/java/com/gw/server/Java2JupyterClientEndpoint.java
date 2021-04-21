@@ -26,7 +26,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.gw.jpa.Host;
-import com.gw.server.JupyterRedirectServlet.SessionPair;
+import com.gw.tools.JupyterSessionPairTool;
+import com.gw.tools.SessionPair;
 import com.gw.utils.BaseTool;
 
 /**
@@ -111,7 +112,7 @@ public class Java2JupyterClientEndpoint extends Endpoint
                 public void beforeRequest(Map<String, List<String>> nativeheaders) {
 //                	headers.put("Cookie", Arrays.asList("JSESSIONID=" + sessionID));
                 	
-//                	logger.debug("Original Native Headers: " + nativeheaders);
+                	logger.debug("Original Native Headers: " + nativeheaders);
                 	
                 	Map<String, List<String>> uppercaseheaders = new HashMap();
                 	
@@ -130,7 +131,8 @@ public class Java2JupyterClientEndpoint extends Endpoint
                         List<String> values = mapElement.getValue();
                         
 //                        if("Sec-WebSocket-Key".equals(newkey)) {
-                    	if("Host".equals(newkey) || "Origin".equals(newkey) || "Sec-WebSocket-Key".equals(newkey)) {
+                    	// if("Host".equals(newkey) || "Origin".equals(newkey) ) {
+						if("Host".equals(newkey) || "Origin".equals(newkey) || "Sec-WebSocket-Key".equals(newkey)) {
                         	
                         	continue;
                         	
@@ -291,7 +293,7 @@ public class Java2JupyterClientEndpoint extends Endpoint
 //	        this.new_ws_session_between_geoweaver_and_jupyterserver = null;
 //	    	logger.debug("The connection between Javascript and Geoweaver is closed. ");
 	    	
-	    	SessionPair pair = JupyterRedirectServlet.findPairByID(this.pairid);
+	    	SessionPair pair = JupyterSessionPairTool.findPairByID(this.pairid);
 	    	
 	    	if(!bt.isNull(pair)) {
 	    		

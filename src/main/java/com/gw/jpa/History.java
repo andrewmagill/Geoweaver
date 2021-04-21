@@ -5,10 +5,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -23,6 +20,7 @@ public class History {
 //	@GeneratedValue(strategy=GenerationType.AUTO)
     private String			 history_id;
 	
+	@Column(columnDefinition = "LONGTEXT")
     private String			 history_input;
     
     //maximum jupyter notebook 100mb
@@ -35,6 +33,10 @@ public class History {
     @Temporal(TemporalType.TIMESTAMP)
     private Date			 history_end_time;
     
+    @Column(columnDefinition = "TEXT")
+	private String history_notes;
+
+    
     private String			 history_process;
     
     private String           host_id;
@@ -45,6 +47,16 @@ public class History {
     /** end of history section **/
     /**********************************************/
     
+
+	public String getHistory_notes() {
+		return this.history_notes;
+	}
+
+	public void setHistory_notes(String history_notes) {
+		this.history_notes = history_notes;
+	}
+
+
 	public String getIndicator() {
 		return indicator;
 	}

@@ -1,31 +1,25 @@
 package com.gw.tools;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gw.database.DataBaseOperation;
 import com.gw.database.HistoryRepository;
-import com.gw.jpa.Environment;
 import com.gw.jpa.ExecutionStatus;
 import com.gw.jpa.History;
 import com.gw.ssh.SSHSession;
 import com.gw.utils.BaseTool;
 import com.gw.utils.RandomString;
-import com.gw.utils.SysDir;
 import com.gw.web.GeoweaverController;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 /**
  * 
  * All the actions related to the History table
@@ -398,7 +392,102 @@ public class HistoryTool {
 //		return resp.toString();
 		
 	}
+
+	public String deleteAllHistoryByHost(String hostid){
+
+		String resp = null;
+
+		try{
+
+			Collection<History> historylist = historyrepository.findRecentHistory(hostid, 1000);
+
+			Iterator<History> hisint = historylist.iterator();
+
+			StringBuffer idlist = new StringBuffer();
+
+			while(hisint.hasNext()) {
+				
+				History h = hisint.next();
+				
+				idlist.append(h.getHistory_id()).append(",");
+
+				historyrepository.delete(h);
+
+			}
+
+			resp = "{ \"removed_history_ids\": \"" + idlist.toString() + "\"";
+
+		}catch(Exception e){
+
+			e.printStackTrace();
+
+		}
+
+		return resp;
+
+	}
+
+	public String deleteNoNotesHistoryByHost(String hostid){
+
+		String resp = null;
+
+		try{
+
+			Collection<History> historylist = historyrepository.findRecentHistory(hostid, 1000);
+
+			Iterator<History> hisint = historylist.iterator();
+
+			StringBuffer idlist = new StringBuffer();
+
+			while(hisint.hasNext()) {
+				
+				History h = hisint.next();
+
+				if(bt.isNull(h.getHistory_notes())){
+
+					idlist.append(h.getHistory_id()).append(",");
+
+					historyrepository.delete(h);
+
+				}
+				
+			}
+
+			resp = "{ \"removed_history_ids\": \"" + idlist.toString() + "\"";
+
+		}catch(Exception e){
+
+			e.printStackTrace();
+
+		}
+
+		return resp;
+
+	}
 	
+	/**
+	 * Update the notes of a history
+	 */
+	public void updateNotes(String hisid, String notes){
+
+		try{
+
+			logger.info("Updating history: " + hisid + " - " + notes);
+
+			History h = this.getHistoryById(hisid);
+
+			h.setHistory_notes(notes);
+
+			this.saveHistory(h);
+
+		}catch(Exception e){
+
+			e.printStackTrace();
+
+		}
+
+	}
+
 	/**
 	 * Save Jupyter Notebook Checkpoints into the GW database
 	 */

@@ -11,25 +11,6 @@ import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.context.request.WebRequest;
-
 import com.gw.search.GWSearchTool;
 import com.gw.ssh.RSAEncryptTool;
 import com.gw.ssh.SSHSession;
@@ -41,6 +22,26 @@ import com.gw.tools.SessionManager;
 import com.gw.tools.WorkflowTool;
 import com.gw.utils.BaseTool;
 import com.gw.utils.RandomString;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * 
@@ -103,6 +104,48 @@ public class GeoweaverController {
         sessionManager.closeAll();
         
     }
+
+	@RequestMapping(value="/delAllHistory", method= RequestMethod.POST)
+	public @ResponseBody String delAllHistory(ModelMap model, WebRequest request){
+
+		String resp = null;
+
+		try{
+
+			String hostid = request.getParameter("id");
+
+			resp = hist.deleteAllHistoryByHost(hostid);
+
+		}catch(Exception e){
+
+			throw new RuntimeException("failed " + e.getLocalizedMessage());
+
+		}
+
+		return resp;
+
+	}
+
+	@RequestMapping(value="/delNoNotesHistory", method = RequestMethod.POST)
+	public @ResponseBody String delNoNotesHistory(ModelMap model, WebRequest request){
+
+		String resp = null;
+
+		try{
+
+			String hostid = request.getParameter("id");
+
+			resp = hist.deleteNoNotesHistoryByHost(hostid);
+
+		}catch(Exception e){
+
+			throw new RuntimeException("failed " + e.getLocalizedMessage());
+
+		}
+
+		return resp;
+
+	}
 	
 	@RequestMapping(value = "/del", method = RequestMethod.POST)
     public @ResponseBody String del(ModelMap model, WebRequest request){
@@ -897,6 +940,16 @@ public class GeoweaverController {
 				
 				resp = "{\"id\" : \"" + wid + "\"}";
 				
+			}else if(type.equals("history")){
+
+				String hisid = request.getParameter("id");
+
+				String notes = request.getParameter("notes");
+
+				hist.updateNotes(hisid, notes);
+
+				resp = "{\"id\" : \"" + hisid + "\"}";
+
 			}
 			
 		}catch(Exception e) {
@@ -981,6 +1034,7 @@ public class GeoweaverController {
 		
 	}
 	
+
 	
 	@RequestMapping(value = "/retrieve", method = RequestMethod.POST)
     public @ResponseBody String retrieve(ModelMap model, WebRequest request, HttpSession session){
@@ -1038,7 +1092,7 @@ public class GeoweaverController {
 				
 				String hostid = ht.add(hostname, hostip, hostport,  username, url, hosttype, null);
 				
-				resp = "{ \"id\" : \"" + hostid + "\", \"name\" : \""+ hostname + "\" }";
+				resp = "{ \"id\" : \"" + hostid + "\", \"name\" : \""+ hostname + "\", \"type\": \""+hosttype+"\" }";
 				
 			}else if(type.equals("process")) {
 				
@@ -1092,7 +1146,7 @@ public class GeoweaverController {
 				
 				String pid = pt.add(name, lang, code, desc);
 				
-				resp = "{\"id\" : \"" + pid + "\", \"name\":\"" + name + "\"}";
+				resp = "{\"id\" : \"" + pid + "\", \"name\":\"" + name + "\", \"lang\": \""+lang+"\"}";
 				
 			}else if(type.equals("workflow")) {
 				
@@ -1250,7 +1304,7 @@ public class GeoweaverController {
     		
     		e.printStackTrace();
     		
-    		throw new RuntimeException();
+    		throw new RuntimeException(e.getLocalizedMessage());
     		
     	}
     	
